@@ -5,22 +5,22 @@
 #define NUM_KNOBS 4
 #define NUM_SWITCHES 2
 
-
-// pin mappings
-uint8_t knob_pins[NUM_KNOBS] = {A5, A8, A7, A6};
-// cc numbers for the knobs
-uint8_t knob_ccs[NUM_KNOBS] = {15, 16, 17, 18};
-uint8_t switch_pins[NUM_SWITCHES] = {8, 9};
+//***** OBJECTS *****//
 // my encoder on pins 2 and 3 (interrupt-based);
 Encoder encoder(3, 2);
-// encoder button pin
+
+//***** PIN MAPPINGS *****//
+uint8_t knob_pins[NUM_KNOBS] = {A5, A8, A7, A6};
+uint8_t switch_pins[NUM_SWITCHES] = {8, 9};
 uint8_t enc_button_pin = 4;
-// pins to the common anodes of each 7seg digit
 #define NUM_DIGITS 2
-uint8_t display_pins[NUM_DIGITS] = {5, 6};
+uint8_t display_pins[NUM_DIGITS] = {5, 6}; // common anodes of 7segs
+
+//***** OTHER ******//
 // an array containing the digits to display, as indexed in seg_chars
 uint8_t display_chars[NUM_DIGITS];
-
+// cc numbers for the knobs
+uint8_t knob_ccs[NUM_KNOBS] = {15, 16, 17, 18};
 // current state of knobs for each channel
 uint16_t knob_vals[NUM_KNOBS][NUM_CHANNELS];
 // a hash of the "active" state for each knob and switch
@@ -125,6 +125,7 @@ void loop() {
   display_chars[1] = cur_channel;
 
   updateKnobs();
+  updateSwitches();
   
   /*
   if(curTime - lastTime > 10000) {
@@ -224,6 +225,14 @@ void updateKnobs() {
     if (abs(cur_val_i - knob_vals[i][cur_channel-1]) > 1) {
       knob_vals[i][cur_channel-1] = cur_val_i;
     }*/
+  }
+}
+
+uint8_t switch_leds[NUM_SWITCHES] = {2, 3};
+void updateSwitches() {
+  for (uint8_t i = 0; i < NUM_SWITCHES; i++) {
+    bool ss = digitalRead(switch_pins[i]);
+    ss ? bitSet(activityHash, switch_leds[i]) : bitClear(activityHash, switch_leds[i]);
   }
 }
 
